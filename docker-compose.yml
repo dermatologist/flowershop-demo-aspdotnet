@@ -1,8 +1,39 @@
 version: '2'
 
 services:
-  flowershop:
-    image: flowershop
-    build:
-      context: ./FlowerShop
-      dockerfile: Dockerfile
+  postgresserver:
+     image: postgres:latest
+     restart: always
+     ports:
+       - 5432:5432
+     environment:
+        #default user: postgres https://github.com/docker-library/docs/tree/master/postgres
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+     volumes:
+       - pgdata:/mnt/sdcard/postgresql/data 
+       # /var/lib/postgresql/data 
+
+     networks:
+       - mynetwork
+
+  aspnetcorepostgresqldocker:
+     image: aspnetcorepostgresqldocker
+     ports:
+       - 5001:80
+     build:
+       context: ./FlowerShop
+       dockerfile: Dockerfile
+     links:
+       - postgresserver
+     depends_on:
+       - "postgresserver"
+     networks:
+       - mynetwork
+
+volumes:
+  pgdata:
+
+networks:
+  mynetwork:
+     driver: bridge
